@@ -274,18 +274,21 @@ export default function Communication() {
         content: m.content,
       }));
 
-      const response = await fetch("http://localhost:3001/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+      const response = await fetch(
+        "https://speakwiseai-z1g2.onrender.com/api/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            threadId: currentThreadId,
+            messages: apiMessages,
+            feature: "communication",
+          }),
         },
-        body: JSON.stringify({
-          threadId: currentThreadId,
-          messages: apiMessages,
-          feature: "communication",
-        }),
-      });
+      );
 
       if (!response.ok) throw new Error("Failed to connect to AI server");
 

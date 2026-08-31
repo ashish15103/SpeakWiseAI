@@ -340,14 +340,17 @@ export default function MockInterview() {
     const userMsg = { role: "user", content: message };
     const apiMessages = [...conversationHistoryRef.current, userMsg];
 
-    const response = await fetch("http://localhost:3001/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      "https://speakwiseai-z1g2.onrender.com/api/chat",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ threadId, messages: apiMessages }),
       },
-      body: JSON.stringify({ threadId, messages: apiMessages }),
-    });
+    );
 
     if (!response.ok) throw new Error("AI request failed.");
     const reader = response.body?.getReader();
