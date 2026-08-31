@@ -733,16 +733,16 @@ function DoubtSolver() {
                     aria-label={`Delete ${thread.title}`}
                     title="Delete chat"
                     className="
-                    mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center
-                    rounded-md text-gray-400
-                    opacity-0 transition-all duration-150
-                    group-hover:opacity-100
-                    focus-visible:opacity-100
-                    hover:bg-red-50 hover:text-red-500
-                    focus:outline-none focus:ring-2 focus:ring-red-500/30
-                    dark:hover:bg-red-900/20
-                    md:opacity-0
-                  "
+    mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center
+    rounded-md text-gray-400
+    opacity-100
+    transition-colors
+    hover:bg-red-50 hover:text-red-500
+    focus:outline-none focus:ring-2 focus:ring-red-500/30
+    dark:text-gray-500
+    dark:hover:bg-red-900/20
+    dark:hover:text-red-400
+  "
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
