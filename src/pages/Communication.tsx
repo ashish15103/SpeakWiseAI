@@ -35,11 +35,9 @@ type Message = {
 };
 
 const SUGGESTIONS = [
-  "Let's practice a self-introduction.",
   "I want to talk about my career goals.",
   "Let's do a roleplay at a coffee shop.",
   "Give me a random daily topic to discuss.",
-  "Can we practice small talk for a networking event?",
   "Help me improve my grammar in casual conversation.",
 ];
 
@@ -75,8 +73,6 @@ export default function Communication() {
     textarea.style.height = "0px";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
   }, [input]);
-
-  const activeThread = threads.find((t) => t.id === threadId);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -422,15 +418,6 @@ export default function Communication() {
         <div className="pointer-events-none absolute -top-20 left-1/2 -z-10 h-48 w-full max-w-2xl -translate-x-1/2 rounded-full bg-fuchsia-400/20 blur-3xl dark:bg-fuchsia-500/10" />
         <div className="pointer-events-none absolute -bottom-20 left-1/2 -z-10 h-48 w-full max-w-2xl -translate-x-1/2 rounded-full bg-fuchsia-400/20 blur-3xl dark:bg-fuchsia-500/10" />
 
-        {activeThread && (
-          <div className="z-10 flex items-center gap-2 border-b border-gray-100 bg-white/80 px-6 py-3 backdrop-blur dark:border-gray-800 dark:bg-gray-950/80">
-            <MessageSquare className="h-4 w-4 shrink-0 text-fuchsia-500" />
-            <span className="min-w-0 truncate text-sm font-medium text-gray-700 dark:text-gray-300">
-              {activeThread.title}
-            </span>
-          </div>
-        )}
-
         <div
           ref={scrollRef}
           className="relative flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)]"
@@ -439,9 +426,11 @@ export default function Communication() {
             <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-fuchsia-50/60 via-white to-pink-50/40 dark:from-fuchsia-950/10 dark:via-gray-950 dark:to-pink-950/10" />
           )}
 
-          <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
+          <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-5 sm:py-8">
+            {" "}
             {showEmptyState ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center md:py-16">
+              <div className="flex flex-col items-center justify-center py-6 text-center sm:py-10 md:py-16">
+                {" "}
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 to-pink-500 text-white shadow-xl">
                   <Languages className="h-8 w-8" />
                 </div>
@@ -452,8 +441,8 @@ export default function Communication() {
                   Practice speaking fluently. Use the microphone to speak, and
                   click the speaker icon to listen to AI responses.
                 </p>
-
-                <div className="mt-8 flex flex-wrap justify-center gap-2">
+                <div className="mt-6 flex w-full flex-col items-center gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:justify-center">
+                  {" "}
                   {SUGGESTIONS.map((s) => (
                     <button
                       key={s}
@@ -461,7 +450,7 @@ export default function Communication() {
                         setInput(s);
                         inputRef.current?.focus();
                       }}
-                      className="rounded-full border border-fuchsia-200 bg-white px-4 py-2 text-sm text-fuchsia-700 transition hover:border-fuchsia-400 hover:bg-fuchsia-50 dark:border-fuchsia-800 dark:bg-transparent dark:text-fuchsia-300 dark:hover:bg-fuchsia-900/30"
+                      className="w-full max-w-sm rounded-full border border-fuchsia-200 bg-white px-4 py-2.5 text-center text-sm text-fuchsia-700 shadow-sm transition hover:border-fuchsia-400 hover:bg-fuchsia-50 active:scale-[0.98] dark:border-fuchsia-800 dark:bg-transparent dark:text-fuchsia-300 dark:hover:bg-fuchsia-900/30 sm:w-auto"
                     >
                       {s}
                     </button>
@@ -495,11 +484,9 @@ export default function Communication() {
         </div>
 
         {/* Input Bar */}
-        <div className="bg-white/80 px-4 pb-5 pt-3 backdrop-blur-sm dark:bg-gray-950/80">
-          <div className="mx-auto max-w-2xl">
-            <div
-              className={`flex items-end gap-2 rounded-4xl border bg-white px-4 py-3 shadow-sm transition-all focus-within:shadow-md dark:bg-gray-900 ${isListening ? "border-fuchsia-500 ring-2 ring-fuchsia-500/20 dark:border-fuchsia-500" : "border-gray-200 focus-within:border-fuchsia-300 dark:border-gray-800 dark:focus-within:border-fuchsia-700"}`}
-            >
+        <div className="bg-white/80 px-4 pb-2 pt-3 backdrop-blur-sm dark:bg-gray-950/80">
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm transition-all focus-within:border-fuchsia-300 focus-within:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:focus-within:border-fuchsia-700">
               <textarea
                 ref={inputRef}
                 rows={1}
@@ -514,7 +501,7 @@ export default function Communication() {
                 placeholder={
                   isListening
                     ? "Listening... speak now"
-                    : "Type or click the microphone to speak..."
+                    : "Type or click the microphone..."
                 }
                 disabled={sending}
                 className="max-h-40 min-h-[36px] flex-1 resize-none overflow-y-auto bg-transparent text-sm leading-relaxed text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-600"

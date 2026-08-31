@@ -124,6 +124,16 @@ export default function MockInterview() {
   // 👇 NEW: Clear state whenever navigating between different interview threads
   useEffect(() => {
     if (threadId) {
+      // Restore the mode for this specific interview thread. This prevents
+      // the header from falling back to the generic "Mock Interview" label.
+      const savedModeId = sessionStorage.getItem(
+        `speakwise-interview-mode-${threadId}`,
+      );
+      const savedMode = MODES.find((m) => m.id === savedModeId);
+      if (savedMode) {
+        setMode(savedMode);
+      }
+
       setStatus("ready");
       setQuestion("");
       setTranscript("");
@@ -253,6 +263,12 @@ export default function MockInterview() {
     try {
       const newThread = await createThread("interview", selectedMode.id);
       setMode(selectedMode);
+      // Persist the selected interview mode so the correct heading survives
+      // route changes and page refreshes for the active interview.
+      sessionStorage.setItem(
+        `speakwise-interview-mode-${newThread.id}`,
+        selectedMode.id,
+      );
       navigate(`/mock-interview/${newThread.id}`);
     } catch (error) {
       console.error(error);
@@ -495,26 +511,26 @@ export default function MockInterview() {
         <AppSidebar user={user} />
 
         <main className="flex-1 overflow-y-auto relative">
-          <div className="flex min-h-full items-center justify-center p-8">
-            <div className="relative w-full max-w-3xl text-center">
+          <div className="flex min-h-full items-center justify-center overflow-y-auto px-4 py-8 sm:p-8">
+            <div className="relative w-full max-w-3xl py-2 text-center">
               <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-purple-500 text-white shadow-lg">
                 <Sparkles className="h-8 w-8" />
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
                 AI Mock Interview
               </h1>
-              <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+              <p className="mx-auto mt-3 max-w-xl px-2 text-sm leading-6 text-muted-foreground sm:px-0">
                 Practice realistic interviews using your voice. Speak naturally
                 and receive AI-powered feedback.
               </p>
 
-              <div className="mx-auto mt-10 grid gap-4 md:grid-cols-3">
+              <div className="mx-auto mt-7 grid w-full gap-3 sm:mt-10 sm:gap-4 md:grid-cols-3">
                 {MODES.map((m, i) => (
                   <button
                     key={m.id}
                     onClick={() => handleStartMode(m)}
                     disabled={pending}
-                    className="group flex flex-col items-start gap-4 rounded-2xl border bg-card p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-violet-500 hover:shadow-lg disabled:opacity-50"
+                    className="group flex min-h-[116px] flex-col items-start gap-3 rounded-2xl border bg-card p-4 text-left shadow-sm transition hover:-translate-y-1 hover:border-violet-500 hover:shadow-lg disabled:opacity-50 sm:min-h-0 sm:gap-4 sm:p-6"
                   >
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-sm font-bold text-white shadow-md">
                       {String(i + 1).padStart(2, "0")}
@@ -545,7 +561,11 @@ export default function MockInterview() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
-      <AppSidebar user={user} />
+      {/* Keep the existing sidebar on desktop. On mobile, the interview
+          screen uses only its compact header (no hamburger/profile panel). */}
+      <div className="hidden sm:block">
+        <AppSidebar user={user} />
+      </div>
 
       {/* Everything below is a single fixed-height column: header (auto),
           content (flex-1, min-h-0 so it never pushes the page taller than
@@ -555,24 +575,25 @@ export default function MockInterview() {
       <main className="flex h-screen flex-1 flex-col overflow-hidden relative">
         {/* ── Header ────────────────────────────────────────────────────── */}
         <header className="shrink-0 border-b border-gray-200 bg-white/90 backdrop-blur dark:border-gray-800 dark:bg-gray-950/90">
-          <div className="flex items-center justify-between px-5 py-3">
+          <div className="flex items-center justify-between gap-2 px-3 py-2.5 sm:px-5 sm:py-3">
             <button
               onClick={() => {
                 interviewActiveRef.current = false;
                 window.speechSynthesis.cancel();
                 navigate("/mock-interview");
               }}
-              className="flex items-center text-sm font-medium text-gray-600 transition-colors hover:text-violet-600 dark:text-gray-300 dark:hover:text-violet-400"
+              className="flex min-w-0 items-center rounded-xl px-1 py-2 text-xs font-medium text-gray-600 transition-colors hover:text-violet-600 sm:text-sm dark:text-gray-300 dark:hover:text-violet-400"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Exit
+              <ArrowLeft className="mr-1.5 h-4 w-4 shrink-0 sm:mr-2" />{" "}
+              <span>Exit</span>
             </button>
 
             <div className="text-center">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+              <p className="max-w-[46vw] truncate text-xs font-semibold text-gray-900 sm:max-w-none sm:text-sm dark:text-white">
                 {mode?.label ?? "Mock Interview"}
               </p>
               {interviewStarted && status !== "completed" && (
-                <p className="text-xs text-gray-400">
+                <p className="text-[10px] text-gray-400 sm:text-xs">
                   Question {questionNumber} of {QUESTION_LIMIT}
                 </p>
               )}
@@ -583,7 +604,7 @@ export default function MockInterview() {
                 setIsMuted((v) => !v);
                 window.speechSynthesis.cancel();
               }}
-              className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+              className="shrink-0 rounded-xl p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 active:scale-95 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
               title={isMuted ? "Unmute AI voice" : "Mute AI voice"}
             >
               {isMuted ? (
@@ -610,24 +631,24 @@ export default function MockInterview() {
 
           {!interviewStarted ? (
             /* ── Setup screen ───────────────────────────────────────────── */
-            <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-5">
+            <div className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-3 py-4 sm:items-center sm:p-5">
               <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg shadow-violet-500/5 dark:border-gray-800 dark:bg-gray-900">
-                <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 to-purple-500 px-8 py-8 text-center text-white">
+                <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 to-purple-500 px-5 py-6 text-center text-white sm:px-8 sm:py-8">
                   <div className="pointer-events-none absolute inset-0 bg-white/5" />
                   <div className="relative mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-3xl backdrop-blur">
                     🤖
                   </div>
-                  <h2 className="relative text-2xl font-bold">
+                  <h2 className="relative text-xl font-bold sm:text-2xl">
                     Ready for your interview?
                   </h2>
-                  <p className="relative mx-auto mt-2 max-w-md text-sm leading-6 text-white/85">
+                  <p className="relative mx-auto mt-2 max-w-md px-1 text-xs leading-5 text-white/85 sm:px-0 sm:text-sm sm:leading-6">
                     Answer naturally using your microphone — one question at a
                     time.
                   </p>
                 </div>
 
-                <div className="px-6 py-6 sm:px-8">
-                  <div className="grid grid-cols-3 gap-2.5">
+                <div className="px-4 py-5 sm:px-8 sm:py-6">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
                     <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-800/40">
                       <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400">
                         01
@@ -661,7 +682,7 @@ export default function MockInterview() {
                     </div>
                   )}
 
-                  <div className="mt-6">
+                  <div className="mt-5 sm:mt-6">
                     <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Target Role (Optional)
                     </label>
@@ -669,7 +690,7 @@ export default function MockInterview() {
                       type="text"
                       value={targetRole}
                       onChange={(e) => setTargetRole(e.target.value)}
-                      placeholder="e.g. Frontend Developer, Data Scientist..."
+                      placeholder="e.g. Frontend Developer..."
                       className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                     />
                   </div>
@@ -677,7 +698,7 @@ export default function MockInterview() {
                   <button
                     disabled={!isSupported || !mode}
                     onClick={startInterview}
-                    className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-purple-500 text-sm font-medium text-white shadow-lg shadow-violet-500/30 transition hover:opacity-90 disabled:opacity-50"
+                    className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-purple-500 text-sm font-medium text-white shadow-lg shadow-violet-500/30 transition hover:opacity-90 active:scale-[0.99] disabled:opacity-50 sm:mt-6"
                   >
                     <Mic className="mr-2 h-5 w-5" /> Start Interview
                   </button>
@@ -686,14 +707,14 @@ export default function MockInterview() {
             </div>
           ) : status === "completed" ? (
             /* ── Completed screen ───────────────────────────────────────── */
-            <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-5">
+            <div className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-3 py-4 sm:items-center sm:p-5">
               <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg shadow-violet-500/5 dark:border-gray-800 dark:bg-gray-900">
-                <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 to-purple-500 px-8 py-8 text-center text-white">
+                <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 to-purple-500 px-5 py-6 text-center text-white sm:px-8 sm:py-8">
                   <div className="pointer-events-none absolute inset-0 bg-white/5" />
                   <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/15 backdrop-blur">
                     <Trophy className="h-8 w-8" />
                   </div>
-                  <h2 className="relative mt-4 text-2xl font-bold">
+                  <h2 className="relative mt-4 text-xl font-bold sm:text-2xl">
                     Interview Complete
                   </h2>
                   <p className="relative mt-1 text-sm text-white/85">
@@ -701,7 +722,7 @@ export default function MockInterview() {
                   </p>
                 </div>
 
-                <div className="max-h-[50vh] overflow-y-auto px-6 py-6 sm:px-8">
+                <div className="max-h-[55vh] overflow-y-auto px-4 py-5 sm:max-h-[50vh] sm:px-8 sm:py-6">
                   <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-800/40">
                     <div className="mb-3 flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
@@ -726,10 +747,10 @@ export default function MockInterview() {
                   </div>
                 </div>
 
-                <div className="border-t border-gray-100 px-6 py-5 dark:border-gray-800">
+                <div className="border-t border-gray-100 px-4 py-4 sm:px-6 sm:py-5 dark:border-gray-800">
                   <button
                     onClick={restart}
-                    className="mx-auto flex h-11 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-purple-500 px-8 text-sm font-medium text-white shadow-md shadow-violet-500/30 transition hover:opacity-90"
+                    className="mx-auto flex h-11 w-full max-w-xs items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-purple-500 px-6 text-sm font-medium text-white shadow-md shadow-violet-500/30 transition hover:opacity-90 active:scale-[0.99] sm:w-auto sm:px-8"
                   >
                     <RotateCcw className="mr-2 h-4 w-4" /> Try Again
                   </button>
@@ -738,10 +759,10 @@ export default function MockInterview() {
             </div>
           ) : (
             /* ── Active interview "cockpit" — fixed to viewport, no page scroll ── */
-            <div className="flex min-h-0 flex-1 flex-col items-center px-4 py-4 sm:px-6">
-              <div className="flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-3">
+            <div className="flex min-h-0 flex-1 flex-col items-center px-3 py-2.5 sm:px-6 sm:py-4">
+              <div className="flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-2.5 sm:gap-3">
                 {/* Compact status strip */}
-                <div className="flex shrink-0 items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 dark:border-gray-800 dark:bg-gray-900">
+                <div className="flex shrink-0 items-center justify-between gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2.5 sm:justify-center sm:gap-3 sm:px-4 dark:border-gray-800 dark:bg-gray-900">
                   <div
                     className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-purple-500 text-base shadow-sm ${
                       status === "speaking" ? "animate-pulse" : ""
@@ -756,7 +777,7 @@ export default function MockInterview() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+                  <div className="min-w-0 flex flex-1 items-center gap-1.5 text-[11px] font-medium text-gray-600 sm:flex-none sm:text-xs dark:text-gray-300">
                     {status === "speaking" && (
                       <>
                         <Volume2 className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />
@@ -779,7 +800,7 @@ export default function MockInterview() {
                   </div>
 
                   {/* Progress dots inline, saves vertical space */}
-                  <div className="ml-2 flex items-center gap-1">
+                  <div className="ml-1 flex shrink-0 items-center gap-1 sm:ml-2">
                     {Array.from({ length: QUESTION_LIMIT }).map((_, i) => (
                       <span
                         key={i}
@@ -794,25 +815,25 @@ export default function MockInterview() {
                 </div>
 
                 {/* Question — flexible, scrolls internally if very long */}
-                <div className="flex min-h-0 flex-[1.1] flex-col rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-purple-50 p-5 dark:border-violet-900/40 dark:from-violet-950/20 dark:to-purple-950/20">
+                <div className="flex min-h-0 flex-[1.1] flex-col rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-purple-50 p-4 sm:p-5 dark:border-violet-900/40 dark:from-violet-950/20 dark:to-purple-950/20">
                   <p className="mb-1.5 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">
                     Question {questionNumber}
                   </p>
                   <div className="min-h-0 flex-1 overflow-y-auto">
-                    <p className="text-lg font-semibold leading-7 text-gray-900 dark:text-white sm:text-xl sm:leading-8">
+                    <p className="text-base font-semibold leading-6 text-gray-900 sm:text-xl sm:leading-8 dark:text-white">
                       {question}
                     </p>
                   </div>
                 </div>
 
                 {/* Your response — flexible, scrolls internally if very long */}
-                <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+                <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 dark:border-gray-800 dark:bg-gray-900">
                   <p className="mb-1.5 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
                     Your response
                   </p>
                   <div className="min-h-0 flex-1 overflow-y-auto">
                     {transcript ? (
-                      <p className="leading-7 text-gray-800 dark:text-gray-200">
+                      <p className="text-sm leading-6 text-gray-800 sm:text-base sm:leading-7 dark:text-gray-200">
                         {transcript}
                       </p>
                     ) : (
@@ -835,7 +856,7 @@ export default function MockInterview() {
                   {status === "listening" ? (
                     <button
                       onClick={finishAnswer}
-                      className="inline-flex h-14 min-w-52 items-center justify-center rounded-full bg-red-500 px-8 text-sm font-medium text-white shadow-lg shadow-red-500/30 transition hover:bg-red-600"
+                      className="inline-flex h-14 w-full max-w-xs items-center justify-center rounded-full bg-red-500 px-6 text-sm font-medium text-white shadow-lg shadow-red-500/30 transition hover:bg-red-600 active:scale-[0.99] sm:w-auto sm:min-w-52 sm:px-8"
                     >
                       <MicOff className="mr-2 h-5 w-5" /> Finish Answer
                     </button>
@@ -845,7 +866,7 @@ export default function MockInterview() {
                       disabled={
                         status === "speaking" || status === "processing"
                       }
-                      className="inline-flex h-14 min-w-52 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-purple-500 px-8 text-sm font-medium text-white shadow-lg shadow-violet-500/30 transition hover:opacity-90 disabled:opacity-50"
+                      className="inline-flex h-14 w-full max-w-xs items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-purple-500 px-6 text-sm font-medium text-white shadow-lg shadow-violet-500/30 transition hover:opacity-90 active:scale-[0.99] sm:w-auto sm:min-w-52 sm:px-8 disabled:opacity-50"
                     >
                       {status === "processing" ? (
                         <>
@@ -863,7 +884,7 @@ export default function MockInterview() {
                       )}
                     </button>
                   )}
-                  <p className="text-[11px] text-gray-400">
+                  <p className="px-2 text-center text-[10px] leading-4 text-gray-400 sm:px-0 sm:text-[11px]">
                     {status === "listening"
                       ? "Click when you have finished your answer."
                       : "Speak clearly, as you would in a real interview."}

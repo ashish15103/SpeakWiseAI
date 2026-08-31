@@ -235,37 +235,42 @@ export default function Dashboard() {
     <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
       <AppSidebar user={user} />
 
-      <main className="relative flex-1 overflow-y-auto">
+      <main className="relative min-w-0 flex-1 overflow-y-auto">
+        {" "}
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
           <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-violet-200/30 blur-3xl dark:bg-violet-900/20" />
           <div className="absolute -left-40 top-1/2 h-96 w-96 rounded-full bg-purple-200/20 blur-3xl dark:bg-purple-900/10" />
         </div>
-
-        <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <div className="mb-10">
+        <div className="relative mx-auto w-full max-w-6xl px-4 pb-10 pt-20 sm:px-6 sm:py-10">
+          {" "}
+          <div className="mb-7 sm:mb-10">
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300">
               <Sparkles className="h-3 w-3" />
               Your progress
             </div>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
+              {" "}
               {getGreeting()},{" "}
               {user.name !== "You" ? user.name.split(" ")[0] : "there"} 👋
             </h1>
-            <p className="mt-1.5 text-base text-gray-500 dark:text-gray-400">
+            <p className="mt-1.5 max-w-xl text-sm leading-6 text-gray-500 sm:text-base dark:text-gray-400">
+              {" "}
               Here's how you're doing across all your sessions.
             </p>
           </div>
-
           {error && <ErrorState message={error} onRetry={fetchStats} />}
           {loading && !error && <LoadingSkeleton />}
-
           {!loading && !error && stats && (
             <>
+              <div className="mb-6">
+                <QuickStartCard />
+              </div>
+
               {stats.totalSessions === 0 ? (
                 <EmptyState />
               ) : (
                 <div className="space-y-6">
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
                     <StatCard
                       icon={Brain}
                       label="Doubts Solved"
@@ -308,7 +313,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="grid gap-4 lg:grid-cols-3">
-                    <div className="rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 lg:col-span-2">
+                    <div className="min-w-0 rounded-2xl border bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-gray-900 lg:col-span-2">
                       <div className="mb-5 flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30">
                           <TrendingUp className="h-4 w-4 text-violet-600 dark:text-violet-400" />
@@ -377,7 +382,7 @@ export default function Dashboard() {
                         </div>
                       )}
 
-                      <div className="mt-3 flex items-center gap-5">
+                      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
                         <div className="flex items-center gap-1.5">
                           <span className="inline-block h-2.5 w-2.5 rounded-full bg-violet-600" />
                           <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -392,14 +397,14 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
-
-                    <QuickStartCard />
                   </div>
                 </div>
               )}
             </>
           )}
-          <SiteFooter />
+          <div className="mt-2 sm:mt-0">
+            <SiteFooter />
+          </div>
         </div>
       </main>
     </div>
@@ -418,7 +423,7 @@ function StatCard({
   gradient: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+    <div className="group relative min-w-0 overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md sm:p-5 dark:border-gray-800 dark:bg-gray-900">
       <div
         className={`absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${gradient} opacity-10 blur-2xl transition-opacity group-hover:opacity-20`}
       />
@@ -430,7 +435,7 @@ function StatCard({
       <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
         {label}
       </p>
-      <p className="mt-1 text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+      <p className="mt-1 text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
         {value}
       </p>
     </div>
@@ -450,12 +455,18 @@ function ScoreCard({
 }) {
   const displayValue = value == null ? null : Math.round(value * 10) / 10;
   return (
-    <div className="flex items-center gap-5 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div className="flex min-w-0 items-center gap-4 rounded-2xl border bg-white p-4 shadow-sm sm:gap-5 sm:p-6 dark:border-gray-800 dark:bg-gray-900">
+      {" "}
       <div className="relative shrink-0">
-        <ScoreRing value={value} color={color} size={72} stroke={6} />
+        <div className="sm:hidden">
+          <ScoreRing value={value} color={color} size={64} stroke={6} />
+        </div>
+        <div className="hidden sm:block">
+          <ScoreRing value={value} color={color} size={72} stroke={6} />
+        </div>
         <div className="absolute inset-0 flex items-center justify-center">
           <span
-            className="text-lg font-extrabold"
+            className="text-base font-extrabold sm:text-lg"
             style={{ color: value == null ? "#9ca3af" : color }}
           >
             {displayValue ?? "—"}
@@ -466,10 +477,10 @@ function ScoreCard({
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
           {label}
         </p>
-        <p className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">
+        <p className="mt-0.5 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
           {displayValue == null ? "—" : `${displayValue} / 10`}
         </p>
-        <p className="mt-1 text-xs text-gray-400">
+        <p className="mt-1 text-[11px] leading-4 text-gray-400 sm:text-xs">
           {value == null ? "Complete a session to see your score." : subtitle}
         </p>
       </div>
@@ -509,7 +520,8 @@ const QUICK_ACTIONS = [
 
 function QuickStartCard() {
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div className="w-full rounded-2xl border bg-white p-4 shadow-sm sm:p-5 dark:border-gray-800 dark:bg-gray-900">
+      {" "}
       <div className="mb-4 flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
           <Star className="h-4 w-4 text-amber-500" />
@@ -527,7 +539,7 @@ function QuickStartCard() {
             <Link
               key={to}
               to={to}
-              className={`group flex items-center gap-3 rounded-xl p-3 ring-1 ring-transparent transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${bg} ${ring}`}
+              className={`group flex min-h-[58px] w-full items-center gap-3 rounded-xl p-3 sm:min-h-0 sm:p-3.5 ring-1 ring-transparent transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${bg} ${ring}`}
             >
               <div
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${gradient} text-white shadow-sm`}
@@ -562,7 +574,7 @@ function EmptyState() {
         Start a session in any workspace — your scores and stats will appear
         here automatically.
       </p>
-      <div className="mt-8 flex flex-wrap justify-center gap-3">
+      <div className="mt-7 flex w-full flex-col justify-center gap-2.5 px-4 sm:mt-8 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-3 sm:px-0">
         <Link
           to="/doubt-solver"
           className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
@@ -588,8 +600,8 @@ function EmptyState() {
 
 function LoadingSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="animate-pulse space-y-5 sm:space-y-6">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
