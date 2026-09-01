@@ -12,6 +12,7 @@ import {
   MicOff,
   Volume2,
   Square,
+  SquarePen,
 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -62,6 +63,7 @@ export default function Communication() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const mobileAutoFollowRef = useRef(true);
 
   const [chatToDelete, setChatToDelete] = useState<{
     id: string;
@@ -142,9 +144,31 @@ export default function Communication() {
     };
   }, [threadId]);
 
+  function isNearBottom(element: HTMLDivElement) {
+    const distanceFromBottom =
+      element.scrollHeight - element.scrollTop - element.clientHeight;
+    return distanceFromBottom < 100;
+  }
+
+  function handleChatScroll() {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    // This behavior is intentionally limited to mobile so desktop scrolling
+    // remains exactly as it was before.
+    if (window.innerWidth < 768) {
+      mobileAutoFollowRef.current = isNearBottom(container);
+    }
+  }
+
   useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
+    const container = scrollRef.current;
+    if (!container) return;
+
+    if (window.innerWidth < 768 && !mobileAutoFollowRef.current) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
       behavior: "smooth",
     });
   }, [messages, streamingText]);
@@ -246,6 +270,7 @@ export default function Communication() {
 
     setInput("");
     setSending(true);
+    mobileAutoFollowRef.current = true;
     setStreamingText("");
 
     const userMessage: Message = {
@@ -500,9 +525,20 @@ export default function Communication() {
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-gray-950 md:h-screen">
       {" "}
-      <AppSidebar user={user} featureSlot={featureSlot} />
+      <AppSidebar user={user} featureSlot={featureSlot} />{" "}
       <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         {" "}
+        {/* Mobile New Chat — belongs to the workspace interface, beside the
+            floating profile button. Desktop remains unchanged. */}
+        <button
+          type="button"
+          onClick={handleNewChat}
+          aria-label="New practice"
+          title="New practice"
+          className="fixed right-[64px] top-4 z-[70] flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white/95 text-gray-700 shadow-md ring-1 ring-gray-200/70 backdrop-blur-md transition-transform hover:scale-105 active:scale-95 md:hidden dark:border-gray-800 dark:bg-gray-900/95 dark:text-gray-200 dark:ring-gray-800"
+        >
+          <SquarePen className="h-[18px] w-[18px]" />
+        </button>
         {/* Soft ambient glow bleeding in from the top/bottom edges — purely
             decorative, sits behind everything (-z-10), same trick already
             used below for the empty-state wash. */}
@@ -510,13 +546,14 @@ export default function Communication() {
         <div className="pointer-events-none absolute -bottom-20 left-1/2 -z-10 h-48 w-full max-w-2xl -translate-x-1/2 rounded-full bg-fuchsia-400/20 blur-3xl dark:bg-fuchsia-500/10" />
         <div
           ref={scrollRef}
+          onScroll={handleChatScroll}
           className="relative min-h-0 flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)]"
         >
           {showEmptyState && (
             <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-fuchsia-50/60 via-white to-pink-50/40 dark:from-fuchsia-950/10 dark:via-gray-950 dark:to-pink-950/10" />
           )}
 
-          <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-5 sm:py-8">
+          <div className="mx-auto w-full max-w-3xl space-y-6 px-4 pb-28 pt-24 sm:pb-8 md:pt-8">
             {" "}
             {showEmptyState ? (
               <div className="flex flex-col items-center justify-center py-6 text-center sm:py-10 md:py-16">
@@ -573,7 +610,7 @@ export default function Communication() {
           </div>
         </div>
         {/* Input Bar */}
-        <div className="bg-white/80 px-4 pb-2 pt-3 backdrop-blur-sm dark:bg-gray-950/80">
+        <div className="max-md:sticky max-md:bottom-0 max-md:z-30 bg-white/80 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:pb-2 dark:bg-gray-950/80">
           <div className="mx-auto max-w-3xl">
             <div className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm transition-all focus-within:border-fuchsia-300 focus-within:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:focus-within:border-fuchsia-700">
               <textarea

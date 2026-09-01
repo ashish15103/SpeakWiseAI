@@ -15,6 +15,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   X,
+  SquarePen,
 } from "lucide-react";
 
 import { supabase } from "../integrations/supabase/client";
@@ -63,13 +64,14 @@ type FeatureSlotProps = {
 type Props = {
   user: AppUser;
   featureSlot?: ReactNode | ((props: FeatureSlotProps) => ReactNode);
+  onNewChat?: () => void;
 };
 
 // ─────────────────────────────────────────────────────────────
 // APP SIDEBAR
 // ─────────────────────────────────────────────────────────────
 
-export function AppSidebar({ user, featureSlot }: Props) {
+export function AppSidebar({ user, featureSlot, onNewChat }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -233,77 +235,88 @@ export function AppSidebar({ user, featureSlot }: Props) {
       )}
 
       {/* ── MOBILE PROFILE ─────────────────────────────────────────────── */}
-      <div
-        ref={mobileProfileRef}
-        className="fixed right-4 top-4 z-[70] md:hidden"
-      >
-        <button
-          type="button"
-          onClick={() => setProfileOpen((value) => !value)}
-          aria-label="Open profile menu"
-          aria-expanded={profileOpen}
-          className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-gray-200/80 backdrop-blur-md transition-transform hover:scale-105 active:scale-95 dark:bg-gray-900/95 dark:ring-gray-800"
-        >
-          {user.avatarUrl ? (
-            <img
-              src={user.avatarUrl}
-              alt={user.name}
-              className="h-9 w-9 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-[11px] font-bold text-white">
-              {initials}
+      <div className="fixed right-4 top-4 z-[70] flex items-center gap-2 md:hidden">
+        {onNewChat && (
+          <button
+            type="button"
+            onClick={onNewChat}
+            aria-label="New chat"
+            title="New chat"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-gray-700 shadow-md ring-1 ring-gray-200/80 backdrop-blur-md transition-transform hover:scale-105 active:scale-95 dark:bg-gray-900/95 dark:text-gray-200 dark:ring-gray-800"
+          >
+            <SquarePen className="h-[18px] w-[18px]" />
+          </button>
+        )}
+
+        <div ref={mobileProfileRef} className="relative md:hidden">
+          <button
+            type="button"
+            onClick={() => setProfileOpen((value) => !value)}
+            aria-label="Open profile menu"
+            aria-expanded={profileOpen}
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-gray-200/80 backdrop-blur-md transition-transform hover:scale-105 active:scale-95 dark:bg-gray-900/95 dark:ring-gray-800"
+          >
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="h-9 w-9 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-[11px] font-bold text-white">
+                {initials}
+              </div>
+            )}
+            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 dark:border-gray-900" />
+          </button>
+
+          {profileOpen && (
+            <div className="absolute right-0 top-12 w-56 overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_12px_40px_rgba(15,23,42,0.18)] ring-1 ring-black/[0.05] dark:bg-gray-900 dark:ring-white/[0.07]">
+              <div className="px-3 py-2.5">
+                <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">
+                  {user.name}
+                </p>
+                <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">
+                  {user.email}
+                </p>
+              </div>
+
+              <div className="my-1 h-px bg-gray-100 dark:bg-gray-800" />
+
+              <Link
+                to="/profile"
+                onClick={() => setProfileOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                <User className="h-4 w-4 text-gray-400" />
+                View Profile
+              </Link>
+
+              <Link
+                to="/settings"
+                onClick={() => setProfileOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                <Settings className="h-4 w-4 text-gray-400" />
+                Settings
+              </Link>
+
+              <div className="my-1 h-px bg-gray-100 dark:bg-gray-800" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  setIsSignOutOpen(true);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </button>
             </div>
           )}
-          <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 dark:border-gray-900" />
-        </button>
-
-        {profileOpen && (
-          <div className="absolute right-0 top-12 w-56 overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_12px_40px_rgba(15,23,42,0.18)] ring-1 ring-black/[0.05] dark:bg-gray-900 dark:ring-white/[0.07]">
-            <div className="px-3 py-2.5">
-              <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">
-                {user.name}
-              </p>
-              <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">
-                {user.email}
-              </p>
-            </div>
-
-            <div className="my-1 h-px bg-gray-100 dark:bg-gray-800" />
-
-            <Link
-              to="/profile"
-              onClick={() => setProfileOpen(false)}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-            >
-              <User className="h-4 w-4 text-gray-400" />
-              View Profile
-            </Link>
-
-            <Link
-              to="/settings"
-              onClick={() => setProfileOpen(false)}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-            >
-              <Settings className="h-4 w-4 text-gray-400" />
-              Settings
-            </Link>
-
-            <div className="my-1 h-px bg-gray-100 dark:bg-gray-800" />
-
-            <button
-              type="button"
-              onClick={() => {
-                setProfileOpen(false);
-                setIsSignOutOpen(true);
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
-          </div>
-        )}
+        </div>
       </div>
 
       {!isCollapsed && (
@@ -318,8 +331,8 @@ export function AppSidebar({ user, featureSlot }: Props) {
       )}
 
       <aside
-        className={`z-50 flex h-screen flex-col overflow-visible bg-white dark:bg-gray-950
-    md:relative md:z-20 md:shrink-0
+        className={`z-50 flex h-[100dvh] flex-col overflow-visible bg-white dark:bg-gray-950
+    md:relative md:z-20 md:h-screen md:shrink-0
     max-md:fixed max-md:left-0 max-md:top-0 max-md:w-[272px]
     max-md:shadow-2xl
     ${isCollapsed ? "w-[56px]" : "w-[272px]"}
@@ -565,81 +578,83 @@ export function AppSidebar({ user, featureSlot }: Props) {
             {/* ───────────────── PROFILE ───────────────── */}
 
             <div className="relative shrink-0 px-3 pb-4 pt-3">
-              <div ref={profileRef} className="relative">
-                <button
-                  onClick={() => setProfileOpen((value) => !value)}
-                  className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition hover:bg-gray-50 dark:hover:bg-gray-900"
-                >
-                  {/* AVATAR */}
+              <div className="flex items-center gap-2">
+                <div ref={profileRef} className="relative min-w-0 flex-1">
+                  <button
+                    onClick={() => setProfileOpen((value) => !value)}
+                    className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition hover:bg-gray-50 dark:hover:bg-gray-900"
+                  >
+                    {/* AVATAR */}
 
-                  <div className="relative shrink-0">
-                    {user.avatarUrl ? (
-                      <img
-                        src={user.avatarUrl}
-                        alt={user.name}
-                        className="h-9 w-9 rounded-full object-cover shadow-sm"
-                      />
-                    ) : (
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-[11px] font-bold text-white shadow-sm">
-                        {initials}
-                      </div>
-                    )}
+                    <div className="relative shrink-0">
+                      {user.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt={user.name}
+                          className="h-9 w-9 rounded-full object-cover shadow-sm"
+                        />
+                      ) : (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-[11px] font-bold text-white shadow-sm">
+                          {initials}
+                        </div>
+                      )}
 
-                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 dark:border-gray-950" />
-                  </div>
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 dark:border-gray-950" />
+                    </div>
 
-                  {/* USER INFO */}
+                    {/* USER INFO */}
 
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">
-                      {user.name}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">
+                        {user.name}
+                      </p>
 
-                    <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">
-                      {user.email}
-                    </p>
-                  </div>
+                      <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">
+                        {user.email}
+                      </p>
+                    </div>
 
-                  <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${
-                      profileOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
+                    <ChevronDown
+                      className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${
+                        profileOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
 
-                {/* PROFILE DROPDOWN */}
+                  {/* PROFILE DROPDOWN */}
 
-                {profileOpen && (
-                  <div className="absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_12px_40px_rgba(15,23,42,0.14)] ring-1 ring-black/[0.04] dark:bg-gray-900 dark:ring-white/[0.06]">
-                    <Link
-                      to="/profile"
-                      onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                    >
-                      <User className="h-4 w-4 text-gray-400" />
-                      View Profile
-                    </Link>
+                  {profileOpen && (
+                    <div className="absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_12px_40px_rgba(15,23,42,0.14)] ring-1 ring-black/[0.04] dark:bg-gray-900 dark:ring-white/[0.06]">
+                      <Link
+                        to="/profile"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        <User className="h-4 w-4 text-gray-400" />
+                        View Profile
+                      </Link>
 
-                    <Link
-                      to="/settings"
-                      onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                    >
-                      <Settings className="h-4 w-4 text-gray-400" />
-                      Settings
-                    </Link>
+                      <Link
+                        to="/settings"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        <Settings className="h-4 w-4 text-gray-400" />
+                        Settings
+                      </Link>
 
-                    <div className="my-1 h-px bg-gray-100 dark:bg-gray-800" />
+                      <div className="my-1 h-px bg-gray-100 dark:bg-gray-800" />
 
-                    <button
-                      onClick={() => setIsSignOutOpen(true)}
-                      className="flex w-full items-center gap-2 px-2 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign out
-                    </button>
-                  </div>
-                )}
+                      <button
+                        onClick={() => setIsSignOutOpen(true)}
+                        className="flex w-full items-center gap-2 px-2 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </>

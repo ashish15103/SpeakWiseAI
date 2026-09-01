@@ -1,4 +1,4 @@
-/**
+/** Existing code
  * Dashboard.tsx
  *
  * Connected to actual Supabase tables: 'threads' and 'session_scores'.

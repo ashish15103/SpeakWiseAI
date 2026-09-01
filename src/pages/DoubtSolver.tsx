@@ -24,7 +24,6 @@ import {
   Loader2,
   MessageSquare,
   MoreVertical,
-  Brain,
   Camera,
   Image as ImageIcon,
   X,
@@ -1332,8 +1331,11 @@ function DoubtSolver() {
       {/* Sidebar                                                            */}
       {/* ================================================================== */}
 
-      <AppSidebar user={user} featureSlot={featureSlot} />
-
+      <AppSidebar
+        user={user}
+        featureSlot={featureSlot}
+        onNewChat={handleNewChat}
+      />
       {/* ================================================================== */}
       {/* Main                                                               */}
       {/* ================================================================== */}
@@ -1343,20 +1345,6 @@ function DoubtSolver() {
         <div className="pointer-events-none absolute -top-20 left-1/2 -z-10 h-48 w-full max-w-[44rem] -translate-x-1/2 rounded-full bg-violet-400/25 blur-3xl dark:bg-violet-500/10" />
 
         <div className="pointer-events-none absolute -bottom-8 left-1/2 -z-10 h-24 w-full max-w-[44rem] -translate-x-1/2 rounded-full bg-violet-400/25 blur-3xl dark:bg-violet-500/10" />
-
-        {/* ================================================================= */}
-        {/* Active thread header                                              */}
-        {/* ================================================================= */}
-
-        {activeThread && (
-          <div className="flex min-h-14 items-center justify-center gap-2 border-b border-gray-100 bg-white/90 px-16 py-3 text-center backdrop-blur dark:border-gray-800 dark:bg-gray-950/90 md:justify-start md:px-6 md:text-left">
-            <Brain className="h-4 w-4 shrink-0 text-violet-500" />
-
-            <span className="min-w-0 max-w-full truncate text-sm font-medium text-gray-700 dark:text-gray-300">
-              {activeThread.title}
-            </span>
-          </div>
-        )}
 
         {/* ================================================================= */}
         {/* Scrollable chat area                                              */}
@@ -1379,7 +1367,11 @@ function DoubtSolver() {
             <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-violet-50/60 via-white to-purple-50/40 dark:from-violet-950/10 dark:via-gray-950 dark:to-purple-950/10" />
           )}
 
-          <div className="mx-auto w-full max-w-3xl space-y-6 px-3 pb-28 pt-8 sm:px-4 sm:pb-8">
+          <div
+            className={`mx-auto w-full max-w-3xl space-y-6 px-3 pb-28 sm:px-4 sm:pb-8 ${
+              activeThread ? "pt-24 md:pt-8" : "pt-20 md:pt-8"
+            }`}
+          >
             {" "}
             {/* ============================================================= */}
             {/* Empty state                                                   */}
