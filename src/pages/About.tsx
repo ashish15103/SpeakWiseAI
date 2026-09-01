@@ -32,7 +32,7 @@ export default function About() {
     <div className="flex h-screen overflow-hidden bg-gray-50 transition-colors duration-300 dark:bg-gray-950">
       <AppSidebar user={user} />
 
-      <main className="relative flex-1 overflow-y-auto">
+      <main className="relative min-h-0 flex-1 overflow-y-auto">
         {/* Decorative Background */}
         <div className="pointer-events-none absolute inset-0 h-96 bg-gradient-to-b from-violet-100/50 to-transparent dark:from-violet-900/10" />
 

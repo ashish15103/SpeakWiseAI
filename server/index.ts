@@ -227,27 +227,27 @@ app.post("/api/chat", async (req, res) => {
     }
 
     /* ---------------------------------------------------
-       CREATE THREAD TITLE
-    --------------------------------------------------- */
+   CREATE THREAD TITLE
+--------------------------------------------------- */
 
     if (
-      feature === "doubt" &&
-      messages.length === 1 &&
+      (feature === "doubt" || feature === "communication") &&
       lastUserMessage.trim()
     ) {
       const title = lastUserMessage.replace(/\s+/g, " ").trim().slice(0, 60);
 
-      supabase
+      const { error: titleError } = await supabase
         .from("threads")
         .update({
           title,
         })
-        .eq("id", threadId)
-        .then(({ error }) => {
-          if (error) {
-            console.error("Failed to update thread title:", error);
-          }
-        });
+        .eq("id", threadId);
+
+      if (titleError) {
+        console.error("Failed to update thread title:", titleError);
+      } else {
+        console.log(`Thread title updated to: "${title}"`);
+      }
     }
 
     /* ---------------------------------------------------
@@ -528,12 +528,6 @@ Output only the answer intended for the user.
     /* ---------------------------------------------------
    SAVE AI RESPONSE
 --------------------------------------------------- */
-
-    await supabase.from("messages").insert({
-      thread_id: threadId,
-      role: "assistant",
-      content: cleaned,
-    });
     const { error: aiMessageError } = await supabase.from("messages").insert({
       thread_id: threadId,
       role: "assistant",

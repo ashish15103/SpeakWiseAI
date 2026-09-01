@@ -69,7 +69,7 @@ export default function ProjectDetails() {
     <div className="flex h-screen overflow-hidden bg-gray-50 transition-colors duration-300 dark:bg-gray-950">
       <AppSidebar user={user} />
 
-      <main className="relative flex-1 overflow-y-auto">
+      <main className="relative min-h-0 flex-1 overflow-y-auto">
         <div className="relative mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="mb-12 border-b border-gray-200 pb-8 dark:border-gray-800">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">

@@ -232,9 +232,9 @@ export default function Dashboard() {
   }, [fetchStats]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
+    <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-gray-950 md:h-screen">
+      {" "}
       <AppSidebar user={user} />
-
       <main className="relative min-w-0 flex-1 overflow-y-auto">
         {" "}
         <div className="pointer-events-none fixed inset-0 overflow-hidden">

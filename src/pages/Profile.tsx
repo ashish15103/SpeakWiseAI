@@ -272,7 +272,7 @@ export default function Profile() {
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
       <AppSidebar user={user} />
 
-      <main className="relative flex-1 overflow-y-auto">
+      <main className="relative min-h-0 flex-1 overflow-y-auto">
         {/* Background decoration */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-violet-100/50 to-transparent dark:from-violet-900/10" />
 

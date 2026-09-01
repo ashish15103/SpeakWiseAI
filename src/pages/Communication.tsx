@@ -7,6 +7,7 @@ import {
   Trash2,
   Loader2,
   MessageSquare,
+  MoreVertical,
   Mic,
   MicOff,
   Volume2,
@@ -66,6 +67,8 @@ export default function Communication() {
     id: string;
     title: string;
   } | null>(null);
+
+  const [mobileMenuId, setMobileMenuId] = useState<string | null>(null);
 
   useEffect(() => {
     const textarea = inputRef.current;
@@ -340,11 +343,12 @@ export default function Communication() {
 
     return (
       <div className="flex flex-col">
-        <div className="px-4 pb-2 pt-3">
+        <div className="hidden px-4 pb-2 pt-3 md:block">
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-fuchsia-100 dark:bg-fuchsia-900/40">
               <MessageSquare className="h-3.5 w-3.5 text-fuchsia-600 dark:text-fuchsia-400" />
             </div>
+
             <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-600">
               Communication
             </p>
@@ -379,7 +383,10 @@ export default function Communication() {
                   className={`group flex items-center rounded-lg transition-colors ${active ? "bg-fuchsia-50 dark:bg-fuchsia-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-800/50"}`}
                 >
                   <button
-                    onClick={() => navigate(`/communication/${thread.id}`)}
+                    onClick={() => {
+                      setMobileMenuId(null);
+                      navigate(`/communication/${thread.id}`);
+                    }}
                     className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
                   >
                     <MessageSquare
@@ -391,13 +398,96 @@ export default function Communication() {
                       {thread.title}
                     </span>
                   </button>
+                  {/* Desktop delete button — KEEP hover behavior */}
                   <button
-                    onClick={() => handleDeleteClick(thread.id, thread.title)}
-                    className="mr-1.5 shrink-0 rounded-md p-1.5 text-gray-400 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:hover:bg-red-900/20"
-                    title="Delete practice"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleDeleteClick(thread.id, thread.title);
+                    }}
+                    aria-label={`Delete ${thread.title}`}
+                    title="Delete chat"
+                    className="
+    mr-1.5 hidden h-7 w-7 shrink-0 items-center justify-center
+    rounded-md
+    text-gray-400
+    opacity-0
+    transition-opacity
+    group-hover:opacity-100
+    focus:opacity-100
+    hover:bg-red-50
+    hover:text-red-500
+    dark:hover:bg-red-900/20
+    dark:hover:text-red-400
+    md:flex
+  "
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
+
+                  {/* Mobile three-dot menu */}
+                  <div className="relative mr-1 md:hidden">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setMobileMenuId((current) =>
+                          current === thread.id ? null : thread.id,
+                        );
+                      }}
+                      aria-label={`More options for ${thread.title}`}
+                      aria-expanded={mobileMenuId === thread.id}
+                      className="
+      flex h-8 w-8 items-center justify-center
+      rounded-lg
+      text-gray-400
+      transition-colors
+      active:bg-gray-100
+      active:text-gray-700
+      dark:active:bg-gray-800
+      dark:active:text-gray-200
+    "
+                    >
+                      <MoreVertical className="h-5 w-5" />
+                    </button>
+
+                    {mobileMenuId === thread.id && (
+                      <div
+                        className="
+        absolute right-0 top-9 z-50
+        w-28 overflow-hidden
+        rounded-xl
+        border border-gray-200
+        bg-white
+        p-1
+        shadow-xl
+        dark:border-gray-700
+        dark:bg-gray-900
+      "
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMobileMenuId(null);
+                            handleDeleteClick(thread.id, thread.title);
+                          }}
+                          className="
+          flex w-full items-center gap-2
+          rounded-lg px-3 py-2
+          text-left text-sm font-medium
+          text-red-500
+          transition-colors
+          active:bg-red-50
+          dark:active:bg-red-900/20
+        "
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })
@@ -408,19 +498,19 @@ export default function Communication() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
+    <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-gray-950 md:h-screen">
+      {" "}
       <AppSidebar user={user} featureSlot={featureSlot} />
-
-      <main className="relative flex flex-1 flex-col overflow-hidden">
+      <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+        {" "}
         {/* Soft ambient glow bleeding in from the top/bottom edges — purely
             decorative, sits behind everything (-z-10), same trick already
             used below for the empty-state wash. */}
         <div className="pointer-events-none absolute -top-20 left-1/2 -z-10 h-48 w-full max-w-2xl -translate-x-1/2 rounded-full bg-fuchsia-400/20 blur-3xl dark:bg-fuchsia-500/10" />
         <div className="pointer-events-none absolute -bottom-20 left-1/2 -z-10 h-48 w-full max-w-2xl -translate-x-1/2 rounded-full bg-fuchsia-400/20 blur-3xl dark:bg-fuchsia-500/10" />
-
         <div
           ref={scrollRef}
-          className="relative flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)]"
+          className="relative min-h-0 flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)]"
         >
           {showEmptyState && (
             <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-fuchsia-50/60 via-white to-pink-50/40 dark:from-fuchsia-950/10 dark:via-gray-950 dark:to-pink-950/10" />
@@ -482,7 +572,6 @@ export default function Communication() {
             )}
           </div>
         </div>
-
         {/* Input Bar */}
         <div className="bg-white/80 px-4 pb-2 pt-3 backdrop-blur-sm dark:bg-gray-950/80">
           <div className="mx-auto max-w-3xl">
@@ -600,34 +689,42 @@ function MessageBubble({
   }, [isPlaying]);
 
   return (
-    <div className={`flex gap-4 ${isUser ? "justify-end" : "justify-start"}`}>
+    <div
+      className={`flex min-w-0 gap-2.5 sm:gap-4 ${
+        isUser ? "justify-end" : "justify-start"
+      }`}
+    >
+      {" "}
       {!isUser && (
-        <div className="flex flex-col items-center gap-2 mt-0.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-600 to-pink-500 text-xs font-bold text-white shadow-sm">
+        <div className="mt-0.5 flex w-8 shrink-0 flex-col items-center gap-1.5 sm:w-9 sm:gap-2">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-600 to-pink-500 text-[11px] font-bold text-white shadow-sm sm:h-9 sm:w-9 sm:text-xs">
             AI
           </div>
-          {/* Audio Button for AI */}
+
           {!loading && (
             <button
               onClick={handleReadAloud}
-              className={`rounded-full p-1.5 transition-colors ${isPlaying ? "bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/40 dark:text-fuchsia-400" : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+              className={`rounded-full p-1 transition-colors ${
+                isPlaying
+                  ? "bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/40 dark:text-fuchsia-400"
+                  : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
               title={isPlaying ? "Stop reading" : "Read aloud"}
             >
               {isPlaying ? (
-                <Square className="h-3.5 w-3.5 fill-current" />
+                <Square className="h-3 w-3 fill-current" />
               ) : (
-                <Volume2 className="h-3.5 w-3.5" />
+                <Volume2 className="h-3 w-3" />
               )}
             </button>
           )}
         </div>
       )}
-
       <div
         className={
           isUser
-            ? "max-w-[75%] rounded-3xl rounded-tr-md bg-gradient-to-r from-fuchsia-600/90 to-pink-500/90 px-5 py-3 text-white shadow-md"
-            : "max-w-[80%]"
+            ? "w-fit max-w-[92%] rounded-3xl rounded-tr-md bg-gradient-to-r from-fuchsia-600/90 to-pink-500/90 px-4 py-3 text-white shadow-md sm:max-w-[75%]"
+            : "min-w-0 flex-1 max-w-none"
         }
       >
         {loading ? (
@@ -641,7 +738,7 @@ function MessageBubble({
             className={
               isUser
                 ? "text-sm leading-relaxed"
-                : "prose prose-sm md:prose-base dark:prose-invert max-w-none break-words leading-7 [&>h3]:mt-4 [&>h3]:mb-2 [&>h3]:text-lg [&>h3]:font-semibold [&>p]:mb-4 [&>ul]:mb-4 [&>ul]:list-disc [&>ul]:pl-6"
+                : "prose prose-sm md:prose-base dark:prose-invert max-w-none break-words px-1 leading-[1.65] sm:px-0 sm:leading-7 [&>h3]:mt-4 [&>h3]:mb-2 [&>h3]:text-lg [&>h3]:font-semibold [&>p]:mb-3 sm:[&>p]:mb-4 [&>ul]:mb-3 sm:[&>ul]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 sm:[&>ul]:pl-6"
             }
           >
             {isUser ? (
@@ -660,7 +757,7 @@ function MessageBubble({
                         children={String(children).replace(/\n$/, "")}
                         language={match[1]}
                         style={vscDarkPlus as any}
-                        className="my-4 !bg-[#1E1E1E] !shadow-md rounded-lg text-sm"
+                        className="my-3 max-w-full overflow-x-auto !bg-[#1E1E1E] !shadow-md rounded-lg text-[12px] sm:my-4 sm:text-sm"
                       />
                     ) : (
                       <code
