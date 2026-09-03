@@ -174,7 +174,8 @@ export default function Communication() {
   }, [messages, streamingText]);
 
   useEffect(() => {
-    if (!sending && !isListening) inputRef.current?.focus();
+    if (!sending && !isListening && window.innerWidth >= 768)
+      inputRef.current?.focus();
   }, [threadId, sending, isListening]);
 
   function handleNewChat() {
@@ -523,7 +524,7 @@ export default function Communication() {
   };
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-gray-950 md:h-screen">
+    <div className="flex h-[100svh] overflow-hidden bg-white dark:bg-gray-950 md:h-screen">
       {" "}
       <AppSidebar user={user} featureSlot={featureSlot} />{" "}
       <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -610,7 +611,8 @@ export default function Communication() {
           </div>
         </div>
         {/* Input Bar */}
-        <div className="max-md:sticky max-md:bottom-0 max-md:z-30 bg-white/80 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:pb-2 dark:bg-gray-950/80">
+        <div className="shrink-0 bg-white/80 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:pb-2 dark:bg-gray-950/80">
+          {" "}
           <div className="mx-auto max-w-3xl">
             <div className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm transition-all focus-within:border-fuchsia-300 focus-within:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:focus-within:border-fuchsia-700">
               <textarea

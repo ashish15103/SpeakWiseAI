@@ -279,7 +279,7 @@ function DoubtSolver() {
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
-    if (!sending) {
+    if (!sending && window.innerWidth >= 768) {
       inputRef.current?.focus();
     }
   }, [threadId, sending]);
@@ -1326,11 +1326,11 @@ function DoubtSolver() {
   /* ------------------------------------------------------------------------ */
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-gray-950 md:h-screen">
+    <div className="flex h-[100svh] overflow-hidden bg-white dark:bg-gray-950 md:h-screen">
+      {" "}
       {/* ================================================================== */}
       {/* Sidebar                                                            */}
       {/* ================================================================== */}
-
       <AppSidebar
         user={user}
         featureSlot={featureSlot}
@@ -1339,7 +1339,6 @@ function DoubtSolver() {
       {/* ================================================================== */}
       {/* Main                                                               */}
       {/* ================================================================== */}
-
       <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         {/* Ambient glow */}
         <div className="pointer-events-none absolute -top-20 left-1/2 -z-10 h-48 w-full max-w-[44rem] -translate-x-1/2 rounded-full bg-violet-400/25 blur-3xl dark:bg-violet-500/10" />
@@ -1796,11 +1795,9 @@ function DoubtSolver() {
           </div>
         </div>
       </main>
-
       {/* ==================================================================== */}
       {/* Camera modal                                                         */}
       {/* ==================================================================== */}
-
       {cameraOpen && (
         <div
           className="
@@ -1906,11 +1903,9 @@ function DoubtSolver() {
           </div>
         </div>
       )}
-
       {/* ==================================================================== */}
       {/* Delete modal                                                         */}
       {/* ==================================================================== */}
-
       <DeleteModal
         isOpen={!!chatToDelete}
         chatTitle={chatToDelete?.title || ""}

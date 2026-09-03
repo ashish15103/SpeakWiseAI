@@ -331,7 +331,7 @@ export function AppSidebar({ user, featureSlot, onNewChat }: Props) {
       )}
 
       <aside
-        className={`z-50 flex h-[100dvh] flex-col overflow-visible bg-white dark:bg-gray-950
+        className={`z-50 flex h-[100svh] flex-col overflow-visible bg-white dark:bg-gray-950
     md:relative md:z-20 md:h-screen md:shrink-0
     max-md:fixed max-md:left-0 max-md:top-0 max-md:w-[272px]
     max-md:shadow-2xl
