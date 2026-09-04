@@ -178,6 +178,15 @@ export default function Communication() {
       inputRef.current?.focus();
   }, [threadId, sending, isListening]);
 
+  // Mobile only: when the composer gets focus (keyboard opening), nudge it
+  // into view instead of letting the on-screen keyboard cover it. Desktop is
+  // unaffected — nothing here changes desktop focus behavior.
+  function handleInputFocus() {
+    window.setTimeout(() => {
+      inputRef.current?.scrollIntoView({ block: "nearest" });
+    }, 80);
+  }
+
   function handleNewChat() {
     navigate("/communication");
   }
@@ -548,7 +557,7 @@ export default function Communication() {
         <div
           ref={scrollRef}
           onScroll={handleChatScroll}
-          className="relative min-h-0 flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)]"
+          className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain [mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_32px,black_calc(100%-72px),transparent)]"
         >
           {showEmptyState && (
             <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-fuchsia-50/60 via-white to-pink-50/40 dark:from-fuchsia-950/10 dark:via-gray-950 dark:to-pink-950/10" />
@@ -614,39 +623,41 @@ export default function Communication() {
         <div className="shrink-0 bg-white/80 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:pb-2 dark:bg-gray-950/80">
           {" "}
           <div className="mx-auto max-w-3xl">
-            <div className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm transition-all focus-within:border-fuchsia-300 focus-within:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:focus-within:border-fuchsia-700">
+            <div className="flex items-end gap-2 rounded-3xl border border-gray-200 bg-white px-4 py-3 shadow-sm transition-all focus-within:border-fuchsia-300 focus-within:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:focus-within:border-fuchsia-700 md:rounded-2xl">
               <textarea
                 ref={inputRef}
                 rows={1}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onFocus={handleInputFocus}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSend();
                   }
                 }}
+                enterKeyHint="send"
                 placeholder={
                   isListening
                     ? "Listening... speak now"
                     : "Type or click the microphone..."
                 }
                 disabled={sending}
-                className="max-h-40 min-h-[36px] flex-1 resize-none overflow-y-auto bg-transparent text-sm leading-relaxed text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-600"
+                className="max-h-40 min-h-[44px] flex-1 resize-none overflow-y-auto bg-transparent text-base leading-relaxed text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-600 md:min-h-[36px] md:text-sm"
               />
 
               {/* Mic Button */}
               <button
                 onClick={toggleListening}
                 disabled={sending}
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all ${isListening ? "bg-red-100 text-red-600 animate-pulse dark:bg-red-900/40 dark:text-red-400" : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"}`}
+                className={`flex h-11 w-11 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-xl transition-all ${isListening ? "bg-red-100 text-red-600 animate-pulse dark:bg-red-900/40 dark:text-red-400" : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"}`}
                 title={isListening ? "Stop listening" : "Use microphone"}
               >
                 {/* 👇 We are now using MicOff here when listening! 👇 */}
                 {isListening ? (
-                  <MicOff className="h-4 w-4" />
+                  <MicOff className="h-5 w-5 md:h-4 md:w-4" />
                 ) : (
-                  <Mic className="h-4 w-4" />
+                  <Mic className="h-5 w-5 md:h-4 md:w-4" />
                 )}
               </button>
 
@@ -654,12 +665,12 @@ export default function Communication() {
               <button
                 onClick={handleSend}
                 disabled={sending || (!input.trim() && !isListening)}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-600 to-pink-500 text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
+                className="flex h-11 w-11 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-600 to-pink-500 text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
               >
                 {sending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin md:h-4 md:w-4" />
                 ) : (
-                  <Send className="h-4 w-4" />
+                  <Send className="h-5 w-5 md:h-4 md:w-4" />
                 )}
               </button>
             </div>
@@ -743,7 +754,7 @@ function MessageBubble({
           {!loading && (
             <button
               onClick={handleReadAloud}
-              className={`rounded-full p-1 transition-colors ${
+              className={`rounded-full p-1.5 transition-colors md:p-1 ${
                 isPlaying
                   ? "bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/40 dark:text-fuchsia-400"
                   : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -751,9 +762,9 @@ function MessageBubble({
               title={isPlaying ? "Stop reading" : "Read aloud"}
             >
               {isPlaying ? (
-                <Square className="h-3 w-3 fill-current" />
+                <Square className="h-3.5 w-3.5 fill-current md:h-3 md:w-3" />
               ) : (
-                <Volume2 className="h-3 w-3" />
+                <Volume2 className="h-3.5 w-3.5 md:h-3 md:w-3" />
               )}
             </button>
           )}
