@@ -10,7 +10,6 @@ import {
   Mail,
   Lock,
   UserRound,
-  ArrowRight,
 } from "lucide-react";
 
 export default function AuthPage() {
@@ -45,22 +44,50 @@ export default function AuthPage() {
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
+
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      toast.error("Please enter your email address.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      toast.error("Please enter your password.");
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: trimmedEmail,
       password,
     });
 
     setLoading(false);
 
     if (error) {
-      toast.error(error.message);
+      if (
+        error.message.toLowerCase().includes("invalid login credentials") ||
+        error.message.toLowerCase().includes("invalid credentials")
+      ) {
+        toast.error(
+          "Incorrect email or password. Please check your credentials and try again.",
+        );
+        return;
+      }
+
+      toast.error("Unable to sign in. Please try again in a moment.");
       return;
     }
 
     toast.success("Welcome back!");
-    navigate("/dashboard"); // Redirect to Dashboard!
+    navigate("/dashboard");
   }
 
   // ... KEEP YOUR signUp, googleSignIn, switchMode, AND return STATEMENT BELOW THIS EXACTLY AS THEY ARE!
@@ -390,10 +417,6 @@ export default function AuthPage() {
                     className="cursor-pointer flex w-full items-center justify-center rounded-xl bg-violet-600 p-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-violet-700 hover:shadow-md disabled:opacity-50"
                   >
                     {loading ? "Signing in..." : "Sign in"}
-
-                    {!loading && (
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    )}
                   </button>
                 </form>
               )}
@@ -488,10 +511,6 @@ export default function AuthPage() {
                     className="cursor-pointer group flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#5146e5] to-[#b45cf4] text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition hover:scale-[1.01] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {loading ? "Creating account..." : "Create account"}
-
-                    {!loading && (
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    )}
                   </button>
                 </form>
               )}
